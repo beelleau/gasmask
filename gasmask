@@ -34,7 +34,7 @@ err() {
 
 show_help() {
   # help option text
-  echo "Usage: ${0##*/} <netmask or ip/netmask> ..."
+  echo "Usage: ${0##*/} <netmask or ip/netmask>"
   echo "Options:"
   echo "  -h, --help    Show this help menu"
   echo ""
@@ -130,9 +130,9 @@ validate_subnet() {
     mid=$(( (low + high) / 2 ))
     if [[ "${valid_mask[$mid]}" == "$i" ]]; then
       return 0
-    elif [[ "${valid_mask[$mid]}" -lt "$i" ]]; then
+    elif [[ "${valid_mask[$mid]}" < "$i" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_mask[$mid]}" -gt "$i" ]]; then
+    elif [[ "${valid_mask[$mid]}" > "$i" ]]; then
       high=$(( mid - 1 ))
     fi
   done
@@ -172,9 +172,9 @@ validate_hex() {
     mid=$(( (low + high) / 2 ))
     if [[ "${valid_hex[$mid]}" == "$i" ]]; then
       return 0
-    elif [[ "${valid_hex[$mid]}" -lt "$i" ]]; then
+    elif [[ "${valid_hex[$mid]}" < "$i" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_hex[$mid]}" -gt "$i" ]]; then
+    elif [[ "${valid_hex[$mid]}" > "$i" ]]; then
       high=$(( mid - 1 ))
     fi
   done
@@ -213,9 +213,9 @@ validate_wildcard() {
     mid=$(( (low + high) / 2 ))
     if [[ "${valid_wildcard[$mid]}" == "$i" ]]; then
       return 0
-    elif [[ "${valid_wildcard[$mid]}" -lt "$i" ]]; then
+    elif [[ "${valid_wildcard[$mid]}" < "$i" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_wildcard[$mid]}" -gt "$i" ]]; then
+    elif [[ "${valid_wildcard[$mid]}" > "$i" ]]; then
       high=$(( mid - 1 ))
     fi
   done
