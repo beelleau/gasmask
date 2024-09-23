@@ -602,6 +602,19 @@ hex_fail() {
 
   err "gasmask: \"${1}\" is not a valid subnet mask!"
   err "(Hex values need 8 chars [0-9][a-f][A-F])"
+  exit 1
+}
+
+ip_fail() {
+  # fail message for invalid ip address
+  #
+  # ARG $1: ip address
+
+  err "gasmask : \"${1}\" is not a valid IP address!"
+  echo "IP addresses take the form \"xxx.xxx.xxx\" where"
+  echo "each octed (group of numbers separated by dots) must be"
+  echo "between 0 and 255 inclusive!"
+  exit 1
 }
 
 main() {
@@ -663,7 +676,8 @@ main() {
      <<< "$subnet_output"
 
   if [[ "$whatmask_mode" -eq 2 ]]; then
-    ip_output=$(gather_gasmask_ip "$ip_address" "$subnet_mask")
+    ip_output=$(gather_gasmask_ip "$ip_address" "$subnet_mask") || \
+      ip_fail "$ip_address"
 
     local network_address broadcast_address first_address last_address
     IFS=' ' read -r \
