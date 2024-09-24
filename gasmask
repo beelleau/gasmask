@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+## Copyright (C) 2001-2003 Joe Laffey
 ## Copyright (C) 2024 Kyle Belleau
 
+## Original Author: Joe Laffey <joe@laffeycomputer.com>
+## Original URL: http://www.laffeycomputer.com/whatmask.html
 ## Author: Kyle Belleau <kylejbelleau@gmail.com>
 ## URL: https://github.com/kbelleau/gasmask
 
@@ -44,18 +47,54 @@ show_help() {
   echo "$ gasmask 192.168.86.27/25"
   echo "$ gasmask 4.5.6.7/0xff000000"
   echo ""
-  echo "See the README for more information,"
-  echo "or visit https://github.com/kbelleau/gasmask"
+  echo "See the README for more information, or"
+  echo "run \"gasmask\" with no arguments, or"
+  echo "visit https://github.com/kbelleau/gasmask"
   echo ""
 }
 
-check4help() {
-  # check for "-h" or long version "--help"
+show_noarg() {
+  echo ""
+  echo "gasmask is a Bash-written copy of Whatmask"
+  echo "whatmask: Copyright (C) 2001-2003 Joe Laffey <joe@laffeycomputer.com>"
+  echo "Visit http://www.laffeycomputer.com/whatmask.html for more information"
+  echo "gasmask: Copyright (C) 2024 Kyle Belleau <kylejbelleau@gmail.com>"
+  echo "Visit https://github.com/kbelleau/gasmask for more information"
+  echo ""
+  echo "This program is licensed under the GNU General Public License version 3"
+  echo "or later (GPL-3.0-or-later)."
+  echo ""
+  echo "gasmask may be used two ways:"
+  echo ""
+  echo "Given a mask:          gasmask <CIDR bits>"
+  echo "               - or -  gasmask <subnet mask>"
+  echo "               - or -  gasmask <hex subnet mask>"
+  echo "               - or -  gasmask <wildcard bit mask>"
+  echo " NOTE: gasmask will autodetect the input and show you all four."
+  echo ""
+  echo ""
+  echo "Given an ip/mask:      gasmask <IP address>/<netmask>"
+  echo "       <netmask> may be one of the following:"
+  echo "                       CIDR notation (e.g. \"24\")"
+  echo "                       Netmask notation (e.g. \"255.255.255.0\")"
+  echo "                       Hex Netmask notation (e.g. \"0xffffff00\")"
+  echo "                       Wildcard bits notation (e.g. \"0.0.0.255\")"
+  echo " NOTE: gasmask will autodetect the netmask format."
+  echo ""
+}
+
+check4args() {
+  # check for "-h", long version "--help", or no arguments
   #
-  # ARG $1: $1 from main
+  # ARG: @
 
   if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_help
+    exit 0
+  fi
+
+  if [[ $# -eq 0 ]]; then
+    show_noarg
     exit 0
   fi
 }
@@ -627,7 +666,7 @@ ip_fail() {
 
 main() {
   # verify that "-h" or "--help" was not requested in $1
-  check4help "$1"
+  check4args "$@"
 
   local subnet_value_initial
   local subnet_type_initial
