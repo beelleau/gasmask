@@ -37,15 +37,15 @@ show_help() {
   echo "Usage: ${0##*/} <netmask or ip/netmask>"
   echo "Options:"
   echo "  -h, --help    Show this help menu"
+  echo "Description: ${0##*/} is a network configuration tool."
+  echo "Examples:"
+  echo "$ gasmask /24"
+  echo "$ gasmask 255.255.255.252"
+  echo "$ gasmask 192.168.86.27/25"
+  echo "$ gasmask 4.5.6.7/0xff000000"
   echo ""
-  echo "Description: gasmask is a network information tool with two modes."
-  echo "The first mode is used by invoking gasmask with only a subnet mask"
-  echo "in any format as an argument. In this mode, gasmask will echo back the"
-  echo "subnet mask in four formats, plus the number of usable addresses"
-  echo "in the subnet's range. To use gasmask in its second mode,"
-  echo "invoke gasmask with any IP address within the subnet, followed by"
-  echo "a slash (\"/\"), followed by the subnet mask in any format."
-  echo "Be sure to not include any spaces in this string."
+  echo "See the README for more information,"
+  echo "or visit https://github.com/kbelleau/gasmask"
   echo ""
 }
 
@@ -54,18 +54,17 @@ check4help() {
   #
   # ARG $1: $1 from main
 
-  if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+  if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_help
     exit 0
   fi
 }
 
 subnet_which_initial() {
-  # determines which type of subnetting value was entered in $1
-  # possible outcomes: CIDR, subnet mask, subnet hexidecimal, wildcard subnet
+  # determines which type of subnet value was entered in $1
+  # possible outcomes: CIDR, subnet mask, subnet hexidecimal, wildcard bits
   #
   # ARG $1: any integer that you may think is a subnetting value
-  #       : $subnet_value_initial in my case
 
   # check to see if we'll detect a hexadecimal subnet mask or
   # a cidr value
@@ -75,7 +74,7 @@ subnet_which_initial() {
   fi
 
   # the 0.0.0.0 check: the only special case
-  # 0.0.0.0 (and 255.255.255.255) can be subnet masks or wilecard masks
+  # 0.0.0.0 (and 255.255.255.255) can be subnet masks or wildcard bits
   # we will always default to it being a subnet mask, though
   if [[ "$1" == "0.0.0.0" ]]; then
     echo "subnetmask"
@@ -93,7 +92,7 @@ subnet_which_initial() {
   fi
 
   # return - error handling
-  # our initial value should have been caught already; if not, return failed
+  # a valid value should have returned already; if not, fail
   return 1
 }
 
@@ -102,10 +101,10 @@ validate_cidr() {
   #
   # ARG $1: cidr
 
-  [[ "$1" =~ ^[0-9]+$ ]] && [[ "$1" -ge 0 ]] && [[ "$1" -le 32 ]] && return 0
+  [[ "$1" =~ ^[0-9]+$ && "$1" -ge 0 && "$1" -le 32 ]] && return 0
 
   # return - error handling
-  # our initial value should have been caught already; if not, return failed
+  # a valid value should have returned already; if not, fail
   return 1
 }
 
@@ -130,7 +129,7 @@ validate_subnet() {
                        "255.255.255.252" "255.255.255.254" "255.255.255.255")
   i="$1"
 
-  # bash binary search
+  # (bash binary search)
   local low mid high
   low="0"
   high=$((${#valid_mask[@]} - 1))
@@ -172,7 +171,6 @@ validate_hex() {
                           "0xfffffffc" "0xfffffffe" "0xffffffff")
   i="$1"
 
-  # bash binary search
   local low mid high
   low="0"
   high=$((${#valid_hex[@]} - 1))
@@ -213,7 +211,6 @@ validate_wildcard() {
                             "31.255.255.255" "63.255.255.255" "7.255.255.255")
   i="$1"
 
-  # bash binary search
   local low mid high
   low="0"
   high=$((${#valid_wildcard[@]} - 1))
@@ -230,7 +227,7 @@ validate_wildcard() {
   done
 
   # if not already returned, that means value was not
-  # found in $valid_mask[] array, and is invalid
+  # found in $valid_wildcard[] array, and is invalid
   return 1
 }
 
@@ -283,9 +280,9 @@ hex2subnetmask() {
 }
 
 wildcard2subnetmask() {
-  # converts a wildcard bit into a subnet mask
+  # converts wildcard bits into a subnet mask
   #
-  # ARG $1: wildcard bit mask
+  # ARG $1: wildcard bits
   # RET: subnet mask
 
   local -a o_a
@@ -343,7 +340,7 @@ subnetmask2wildcard() {
   # converts a subnet mask to a wilcard bit
   #
   # ARG $1: subnet mask
-  # RET: wilcard bit
+  # RET: wilcard bits
 
   local -a o_a
   local i w v
@@ -445,9 +442,8 @@ get_ip_firstu_address() {
   # ARG $2: subnet mask
   # RET: first usable ip address
 
-  [[ "$2" == "255.255.255.255" ]] || [[ "$2" == "255.255.255.254" ]] && \
-    echo -n "<none>" && return 0
-  # if /32 or /31, then return "<none>"
+  [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
+  # if 255.255.255.25[45], then return "<none>"
 
   local i1 i2 i3 il
   IFS=. read -r i1 i2 i3 il <<< "$1"
@@ -465,9 +461,8 @@ get_ip_lastu_address() {
   # ARG $2: subnet mask
   # RET: first usable ip address
 
-  [[ "$2" == "255.255.255.255" ]] || [[ "$2" == "255.255.255.254" ]] && \
-    echo -n "<none>" && return 0
-  # if /32 or /31, then return "<none>"
+  [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
+  # if 255.255.255.25[45], then return "<none>"
 
   local i1 i2 i3 il
   IFS=. read -r i1 i2 i3 il <<< "$1"
@@ -600,9 +595,9 @@ cidr_fail() {
 subnetmask_wildcard_fail() {
   # fail message for invalid subnetmask
   #
-  # ARG $1: subnet mask or wildcard
+  # ARG $1: subnet mask or wildcard bits
 
-  err "gasmask: \"${1}\" is not a valid subnet mask or wildcard bit mask!"
+  err "gasmask: \"${1}\" is not a valid subnet mask or wildcard bits mask!"
   exit 1
 }
 
