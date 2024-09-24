@@ -38,12 +38,21 @@ show_help() {
   echo "Options:"
   echo "  -h, --help    Show this help menu"
   echo ""
+  echo "Description: gasmask is a network information tool with two modes."
+  echo "The first mode is used by invoking gasmask with only a subnet mask"
+  echo "in any format as an argument. In this mode, gasmask will echo back the"
+  echo "subnet mask in four formats, plus the number of usable addresses"
+  echo "in the subnet's range. To use gasmask in its second mode,"
+  echo "invoke gasmask with any IP address within the subnet, followed by"
+  echo "a slash (\"/\"), followed by the subnet mask in any format."
+  echo "Be sure to not include any spaces in this string."
+  echo ""
 }
 
 check4help() {
   # check for "-h" or long version "--help"
   #
-  # ARG $1: $1 from main()
+  # ARG $1: $1 from main
 
   if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
     show_help
@@ -361,7 +370,7 @@ cidr2nouips() {
   local c u
   c="$1"
 
-  u=$(( 2**(32 - c) - 2))
+  [[ "$c" -eq 32 ]] && u="0" ||  u=$(( 2**(32 - c) - 2))
 
   # return
   echo -n "$u"
@@ -436,8 +445,9 @@ get_ip_firstu_address() {
   # ARG $2: subnet mask
   # RET: first usable ip address
 
-  [[ "$2" == "255.255.255.255" ]] && echo -n "n/a" && return 0
-  # if /32 (subnet=255.255.255.255), then return "n/a"
+  [[ "$2" == "255.255.255.255" ]] || [[ "$2" == "255.255.255.254" ]] && \
+    echo -n "<none>" && return 0
+  # if /32 or /31, then return "<none>"
 
   local i1 i2 i3 il
   IFS=. read -r i1 i2 i3 il <<< "$1"
@@ -449,14 +459,15 @@ get_ip_firstu_address() {
 }
 
 get_ip_lastu_address() {
-  # gather the last usable ip address given a network address and subnet
+  # gather the last usable ip address given a broadcast address and subnet
   #
-  # ARG $1: network ip address
+  # ARG $1: broadcast ip address
   # ARG $2: subnet mask
   # RET: first usable ip address
 
-  [[ "$2" == "255.255.255.255" ]] && echo -n "n/a" && return 0
-  # if /32 (subnet=255.255.255.255), then return "n/a"
+  [[ "$2" == "255.255.255.255" ]] || [[ "$2" == "255.255.255.254" ]] && \
+    echo -n "<none>" && return 0
+  # if /32 or /31, then return "<none>"
 
   local i1 i2 i3 il
   IFS=. read -r i1 i2 i3 il <<< "$1"
