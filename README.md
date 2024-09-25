@@ -1,6 +1,6 @@
 # gasmask
 
-gasmask is a shell script written for Bash 3.2+ that can help you configure network settings.  
+gasmask is a shell script written for Bash 4.0+ that can help you configure network settings.  
 
 gasmask is a Bash-written copy of [Whatmask](http://www.laffeycomputer.com/whatmask.html). You can find more information about the `whatmask` utility at this website: http://www.laffeycomputer.com/whatmask.html
 

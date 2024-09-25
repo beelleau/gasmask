@@ -22,7 +22,7 @@
 ## along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # gasmask :: subnet mask notation conversion tool
-# requires: bash3.2+
+# requires: bash 4.0+
 #
 # gaskmask is a bash-written clone of the unix utility "whatmask"
 # find information about the original whatmask utility here:
@@ -486,9 +486,8 @@ get_ip_firstu_address() {
   [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
   # if 255.255.255.25[45], then return "<none>"
 
-  local i1 i2 i3 il
+  local i1 i2 i3 il f
   IFS=. read -r i1 i2 i3 il <<< "$1"
-  local f
   f="$i1.$i2.$i3.$(( il + 1 ))"
 
   # return
@@ -505,9 +504,8 @@ get_ip_lastu_address() {
   [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
   # if 255.255.255.25[45], then return "<none>"
 
-  local i1 i2 i3 il
+  local i1 i2 i3 il f
   IFS=. read -r i1 i2 i3 il <<< "$1"
-  local f
   f="$i1.$i2.$i3.$(( il - 1 ))"
 
   # return
@@ -668,10 +666,7 @@ main() {
   # verify that "-h" or "--help" was not requested in $1
   check4args "$@"
 
-  local subnet_value_initial
-  local subnet_type_initial
-  local ip_address
-  local whatmask_mode
+  local subnet_value_initial subnet_type_initial ip_address whatmask_mode
   # there are two output formats used by `whatmask`
   # check for lack of "/" for the first mode
   # mode 1 means that we did NOT get an ip address in $1
