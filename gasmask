@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+# gaskmask is a Bash-written clone of the Unix utility 'whatmask'
+
 ## Copyright (C) 2001-2003 Joe Laffey
 ## Copyright (C) 2024 Kyle Belleau
 
-## Original Author: Joe Laffey <joe@laffeycomputer.com>
-## Original URL: http://www.laffeycomputer.com/whatmask.html
+## 'whatmask' Author: Joe Laffey <joe@laffeycomputer.com>
+## 'whatmask' URL: http://www.laffeycomputer.com/whatmask.html
 ## Author: Kyle Belleau <kylejbelleau@gmail.com>
 ## URL: https://github.com/kbelleau/gasmask
 
@@ -23,10 +25,6 @@
 
 # gasmask :: subnet mask notation conversion tool
 # requires: bash 4.0+
-#
-# gaskmask is a bash-written clone of the unix utility "whatmask"
-# find information about the original whatmask utility here:
-# http://www.laffeycomputer.com/whatmask.html
 
 trap 'echo -e "\nSIGINT Received... exiting"; exit 130' SIGINT
 
@@ -83,10 +81,10 @@ show_noarg() {
   echo ""
 }
 
-check4args() {
+check_for_args() {
   # check for "-h", long version "--help", or no arguments
   #
-  # ARG: @
+  # ARG*: @
 
   if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_help
@@ -120,17 +118,17 @@ subnet_which_initial() {
     return 0
   fi
 
-  local i
+  local mask
   if [[ "$1" =~ \. ]]; then
     # if we have an address, we'll check the first octet to decide if it is
-    # a subnet mask or a wildcard mask using the first octet
-    i="${1%%.*}"
-    [[ "$i" -gt 127 ]] && echo "subnetmask"
-    [[ "$i" -le 127 ]] && echo "wildcard"
+    # a subnet mask or a wildcard mask
+    mask="${1%%.*}"
+    [[ "$mask" -gt 127 ]] && echo "subnetmask"
+    [[ "$mask" -le 127 ]] && echo "wildcard"
     return 0
   fi
 
-  # return - error handling
+  # return - input validation
   # a valid value should have returned already; if not, fail
   return 1
 }
@@ -142,7 +140,7 @@ validate_cidr() {
 
   [[ "$1" =~ ^[0-9]+$ && "$1" -ge 0 && "$1" -le 32 ]] && return 0
 
-  # return - error handling
+  # return - input validation
   # a valid value should have returned already; if not, fail
   return 1
 }
@@ -153,9 +151,7 @@ validate_subnet() {
   #
   # ARG $1: subnet mask
 
-  local -a valid_mask
-  local i
-  valid_mask=("0.0.0.0" "128.0.0.0" "192.0.0.0" \
+  local -a valid_mask=("0.0.0.0" "128.0.0.0" "192.0.0.0" \
                        "224.0.0.0" "240.0.0.0" "248.0.0.0" \
                        "252.0.0.0" "254.0.0.0" "255.0.0.0" \
                        "255.128.0.0" "255.192.0.0" "255.224.0.0" \
@@ -166,20 +162,18 @@ validate_subnet() {
                        "255.255.255.0" "255.255.255.128" "255.255.255.192" \
                        "255.255.255.224" "255.255.255.240" "255.255.255.248" \
                        "255.255.255.252" "255.255.255.254" "255.255.255.255")
-  i="$1"
 
   # (bash binary search)
-  local low mid high
-  low="0"
+  local low="0" mid high
   high=$((${#valid_mask[@]} - 1))
 
   while [[ "$low" -le "$high" ]]; do
     mid=$(( (low + high) / 2 ))
-    if [[ "${valid_mask[$mid]}" == "$i" ]]; then
+    if [[ "${valid_mask[$mid]}" == "$1" ]]; then
       return 0
-    elif [[ "${valid_mask[$mid]}" < "$i" ]]; then
+    elif [[ "${valid_mask[$mid]}" < "$1" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_mask[$mid]}" > "$i" ]]; then
+    elif [[ "${valid_mask[$mid]}" > "$1" ]]; then
       high=$(( mid - 1 ))
     fi
   done
@@ -195,32 +189,28 @@ validate_hex() {
   #
   # ARG $1: hexadecimal subnet mask
 
-  local -a valid_hex
-  local i
-  valid_hex=("0x00000000" "0x80000000" "0xc0000000" \
-                          "0xe0000000" "0xf0000000"  "0xf8000000" \
-                          "0xfc000000" "0xfe000000" "0xff000000" \
-                          "0xff800000" "0xffc00000" "0xffe00000" \
-                          "0xfff00000" "0xfff80000" "0xfffc0000" \
-                          "0xfffe0000" "0xffff0000" "0xffff8000" \
-                          "0xffffc000" "0xffffe000" "0xfffff000" \
-                          "0xfffff800" "0xfffffc00" "0xfffffe00" \
-                          "0xffffff00" "0xffffff80" "0xffffffc0" \
-                          "0xffffffe0" "0xfffffff0" "0xfffffff8" \
-                          "0xfffffffc" "0xfffffffe" "0xffffffff")
-  i="$1"
+  local -a valid_hex=("0x00000000" "0x80000000" "0xc0000000" \
+                                   "0xe0000000" "0xf0000000"  "0xf8000000" \
+                                   "0xfc000000" "0xfe000000" "0xff000000" \
+                                   "0xff800000" "0xffc00000" "0xffe00000" \
+                                   "0xfff00000" "0xfff80000" "0xfffc0000" \
+                                   "0xfffe0000" "0xffff0000" "0xffff8000" \
+                                   "0xffffc000" "0xffffe000" "0xfffff000" \
+                                   "0xfffff800" "0xfffffc00" "0xfffffe00" \
+                                   "0xffffff00" "0xffffff80" "0xffffffc0" \
+                                   "0xffffffe0" "0xfffffff0" "0xfffffff8" \
+                                   "0xfffffffc" "0xfffffffe" "0xffffffff")
 
-  local low mid high
-  low="0"
+  local low="0" mid high
   high=$((${#valid_hex[@]} - 1))
 
   while [[ "$low" -le "$high" ]]; do
     mid=$(( (low + high) / 2 ))
-    if [[ "${valid_hex[$mid]}" == "$i" ]]; then
+    if [[ "${valid_hex[$mid]}" == "$1" ]]; then
       return 0
-    elif [[ "${valid_hex[$mid]}" < "$i" ]]; then
+    elif [[ "${valid_hex[$mid]}" < "$1" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_hex[$mid]}" > "$i" ]]; then
+    elif [[ "${valid_hex[$mid]}" > "$1" ]]; then
       high=$(( mid - 1 ))
     fi
   done
@@ -235,32 +225,28 @@ validate_wildcard() {
   #
   # ARG $1: wildcard bits
 
-  local -a valid_wildcard
-  local i
-  valid_wildcard=("0.0.0.0" "0.0.0.1" "0.0.0.127" \
-                            "0.0.0.15" "0.0.0.255" "0.0.0.3" \
-                            "0.0.0.31" "0.0.0.63" "0.0.0.7" \
-                            "0.0.1.255" "0.0.127.255" "0.0.15.255" \
-                            "0.0.255.255" "0.0.3.255" "0.0.31.255" \
-                            "0.0.63.255" "0.0.7.255" "0.1.255.255" \
-                            "0.127.255.255" "0.15.255.255" "0.255.255.255" \
-                            "0.3.255.255" "0.31.255.255" "0.63.255.255" \
-                            "0.7.255.255" "1.255.255.255" "127.255.255.255" \
-                            "15.255.255.255" "255.255.255.255" "3.255.255.255" \
-                            "31.255.255.255" "63.255.255.255" "7.255.255.255")
-  i="$1"
+  local -a valid_wildcard=("0.0.0.0" "0.0.0.1" "0.0.0.127" \
+                           "0.0.0.15" "0.0.0.255" "0.0.0.3" \
+                           "0.0.0.31" "0.0.0.63" "0.0.0.7" \
+                           "0.0.1.255" "0.0.127.255" "0.0.15.255" \
+                           "0.0.255.255" "0.0.3.255" "0.0.31.255" \
+                           "0.0.63.255" "0.0.7.255" "0.1.255.255" \
+                           "0.127.255.255" "0.15.255.255" "0.255.255.255" \
+                           "0.3.255.255" "0.31.255.255" "0.63.255.255" \
+                           "0.7.255.255" "1.255.255.255" "127.255.255.255" \
+                           "15.255.255.255" "255.255.255.255" "3.255.255.255" \
+                           "31.255.255.255" "63.255.255.255" "7.255.255.255")
 
-  local low mid high
-  low="0"
+  local low="0" mid high
   high=$((${#valid_wildcard[@]} - 1))
 
   while [[ "$low" -le "$high" ]]; do
     mid=$(( (low + high) / 2 ))
-    if [[ "${valid_wildcard[$mid]}" == "$i" ]]; then
+    if [[ "${valid_wildcard[$mid]}" == "$1" ]]; then
       return 0
-    elif [[ "${valid_wildcard[$mid]}" < "$i" ]]; then
+    elif [[ "${valid_wildcard[$mid]}" < "$1" ]]; then
       low=$(( mid + 1 ))
-    elif [[ "${valid_wildcard[$mid]}" > "$i" ]]; then
+    elif [[ "${valid_wildcard[$mid]}" > "$1" ]]; then
       high=$(( mid - 1 ))
     fi
   done
@@ -270,146 +256,161 @@ validate_wildcard() {
   return 1
 }
 
-cidr2subnetmask() {
+cidr_to_subnetmask() {
   # converts a cidr value into a subnet mask
   #
-  # ARG #1: cidr
+  # ARG $1: a cidr value
   # RET: subnet mask
 
-  local c i s
-  c="$1"
+  # since we will operate on $1, let's reassign it now
+  local cidr="$1" subnet_mask
 
-  # Calculate the subnet mask
+  # iterate over each octed of the subnet mask
+  local i
   for ((i=0; i<4; i++)); do
-    if (( c >= 8 )); then
-      s+="255"
-      c=$(( c - 8 ))
+    if (( cidr >= 8 )); then
+      subnet_mask+="255"
+      cidr=$(( cidr - 8 ))
     else
-      s+=$(( 256 - (1 << (8 - c)) ))
-      c=0
+      subnet_mask+=$(( 256 - (1 << (8 - cidr)) ))
+      cidr=0
     fi
-    (( i < 3 )) && s+="."
+    (( i < 3 )) && subnet_mask+="."
   done
 
   # return
-  echo -n "$s"
+  echo -n "$subnet_mask"
 }
 
-hex2subnetmask() {
+hex_to_subnetmask() {
   # converts a subnet mask hexadecimal value into a subnet mask
   #
-  # ARG #1: subnet mask hexadecimal
+  # ARG $1: subnet mask hexadecimal
   # RET: subnet mask
 
-  local h s i v o
+  local hex subnet_mask octet_value current_octet
 
-  h=${1:2}
-
-  for ((i=0; i<${#h}; i+=2)); do
-    o=${h:$i:2}
-    v=$((16#$o))
-    s+="${v}."
+  hex=${1:2}
+  # iterate over the hexadecimal digits in pairs
+  # - extract the current pair
+  # - convert the hexadecimal pair to decimal octed
+  # - append that value to the subnet mask to return
+  local i
+  for ((i=0; i<${#hex}; i+=2)); do
+    current_octet=${hex:$i:2}
+    octet_value=$((16#$current_octet))
+    subnet_mask+="${octet_value}."
   done
 
   # remove the trailing decimal
-  s=${s::-1}
+  subnet_mask=${subnet_mask%.}
 
   # return
-  echo -n "$s"
+  echo -n "$subnet_mask"
 }
 
-wildcard2subnetmask() {
+wildcard_to_subnetmask() {
   # converts wildcard bits into a subnet mask
   #
   # ARG $1: wildcard bits
   # RET: subnet mask
 
-  local -a o_a
-  local s v i
-  IFS='.' read -r -a o_a <<< "$1"
+  local -a octets_arr subnet_mask octet_value
 
-  for i in "${o_a[@]}"; do
-    v=$((255 - i))
-    s+="${v}."
+  # convert wildcard bits to array of octets
+  IFS='.' read -r -a octets_arr <<< "$1"
+
+  local i
+  for i in "${octets_arr[@]}"; do
+    # calculate subnet octet value by subtracting the wildcard octet from 255
+    octet_value=$((255 - i))
+    subnet_mask+="${octet_value}."
   done
 
   # remove the trailing decimal
-  s=${s::-1}
+  subnet_mask=${subnet_mask%.}
 
   # return
-  echo -n "$s"
+  echo -n "$subnet_mask"
 }
 
-subnetmask2cidr() {
+subnetmask_to_cidr() {
   # converts a subnet mask to a cidr value
   #
   # ARG $1: subnet mask
   # RET: cidr
 
-  local i
-  i=${1##*255.}
+  # `to` should be named `trailing_octets`, but it's too long
+  local to
+  to=${1##*255.}
   set -- \
-      "0^^^128^192^224^240^248^252^254^" "$(( (${#1} - ${#i})*2 ))" "${i%%.*}"
-  i=${1%%"${3}"*}
+      "0^^^128^192^224^240^248^252^254^" "$(( (${#1} - ${#to})*2 ))" "${to%%.*}"
+  to=${1%%"${3}"*}
 
   # return
-  echo -n $(( ${2} + (${#i}/4) ))
+  echo -n $(( ${2} + (${#to}/4) ))
 }
 
-subnetmask2hex() {
+subnetmask_to_hex() {
   # converts a subnet mask to a hexadecimal
   #
   # ARG $1: subnet mask
   # RET: hexadecimal subnet
 
-  local -a o_a
-  local i h v
-  IFS='.' read -r -a o_a <<< "$1"
+  local -a octets_arr hex hex_pair
 
-  for i in "${o_a[@]}"; do
-    v=$(printf '%02x' "$i")
-    h+="$v"
+  # convert subnet mask to array of octets
+  IFS='.' read -r -a octets_arr <<< "$1"
+
+  local octet_value
+  for octet_value in "${octets_arr[@]}"; do
+    # convert each octet to a two digit hexadecimal value
+    # printf does the magic to convert it
+    hex_pair=$(printf '%02x' "$octet_value")
+    hex+="$hex_pair"
   done
 
   # return
-  echo -n "0x${h}"
+  echo -n "0x${hex}"
 }
 
-subnetmask2wildcard() {
+subnetmask_to_wildcard() {
   # converts a subnet mask to a wilcard bit
   #
   # ARG $1: subnet mask
   # RET: wilcard bits
 
-  local -a o_a
-  local i w v
-  IFS='.' read -r -a o_a <<< "$1"
+  local -a subnet_arr wildcard octet
 
-  for i in "${o_a[@]}"; do
-    v=$((255 - i))
-    w+="${v}."
+  # convert subnet mask to array of octets
+  IFS='.' read -r -a subnet_arr <<< "$1"
+
+  local i
+  for i in "${subnet_arr[@]}"; do
+    octet=$((255 - i))
+    wildcard+="${octet}."
   done
 
   # remove trailing decimal
-  w=${w::-1}
+  wildcard=${wildcard%.}
 
   # return
-  echo -n "$w"
+  echo -n "$wildcard"
 }
 
-cidr2nouips() {
+cidr_to_no_ips() {
   # uses the cidr to determine the number of usable ip addresses in a network
   #
   # ARG $1: cidr
   # RET: number of usable ip addresses in a network
 
-  local c u
-  c="$1"
+  local cidr usable_ips
+  cidr="$1"
 
-  [[ "$c" -eq 32 ]] && u="0" ||  u=$(( 2**(32 - c) - 2))
+  [[ "$cidr" -eq 32 ]] && usable_ips="0" || usable_ips=$(( 2**(32 - cidr) - 2))
 
   # return
-  echo -n "$u"
+  echo -n "$usable_ips"
 }
 
 validate_ip_address() {
@@ -419,10 +420,13 @@ validate_ip_address() {
 
   [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || return 1
 
-  local -a o_a
+  local -a ip_arr
+
+  # convert ip address to array
+  IFS='.' read -r -a ip_arr <<< "$1"
+
   local i
-  IFS='.' read -r -a o_a <<< "$1"
-  for i in "${o_a[@]}"; do
+  for i in "${ip_arr[@]}"; do
     ((i < 0 || i > 255)) && return 1
   done
 
@@ -437,20 +441,22 @@ get_ip_network_address() {
   # ARG $2: subnet mask
   # RET: network address
 
-  local -a i_a m_a n_a
+  local -a ip_arr
+  local -a subnet_arr
+  local -a netw_arr
 
-  # Convert IP and mask to arrays
-  IFS=. read -r -a i_a <<< "$1"
-  IFS=. read -r -a m_a <<< "$2"
+  # convert IP and mask to arrays
+  IFS='.' read -r -a ip_arr <<< "$1"
+  IFS='.' read -r -a subnet_arr <<< "$2"
 
-  # Calculate network address
+  # calculate network address
   local i
   for i in {0..3}; do
-    n_a[i]=$(( i_a[i] & m_a[i] ))
+    netw_arr[i]=$(( ip_arr[i] & subnet_arr[i] ))
   done
 
   # return
-  echo -n "${n_a[0]}.${n_a[1]}.${n_a[2]}.${n_a[3]}"
+  echo -n "${netw_arr[0]}.${netw_arr[1]}.${netw_arr[2]}.${netw_arr[3]}"
 }
 
 get_ip_broadcast_address() {
@@ -460,23 +466,24 @@ get_ip_broadcast_address() {
   # ARG $2: subnet mask
   # RET: broadcast address
 
-  local -a i_a m_a b_a
+  local -a ip_arr
+  local -a subnet_arr
+  local -a broadc_arr
 
-  # Convert IP and mask to arrays
-  IFS=. read -r -a i_a <<< "$1"
-  IFS=. read -r -a m_a <<< "$2"
+  # convert IP and mask to arrays
+  IFS='.' read -r -a ip_arr <<< "$1"
+  IFS='.' read -r -a subnet_arr <<< "$2"
 
-  # Calculate broadcast address
   local i
   for i in {0..3}; do
-    b_a[i]=$((i_a[i] | (255 - m_a[i])))
+    broadc_arr[i]=$((ip_arr[i] | (255 - subnet_arr[i])))
   done
 
   # return
-  echo -n "${b_a[0]}.${b_a[1]}.${b_a[2]}.${b_a[3]}"
+  echo -n "${broadc_arr[0]}.${broadc_arr[1]}.${broadc_arr[2]}.${broadc_arr[3]}"
 }
 
-get_ip_firstu_address() {
+get_ip_first_address() {
   # gather the first usable ip address given a network address and subnet
   #
   # ARG $1: network ip address
@@ -486,30 +493,32 @@ get_ip_firstu_address() {
   [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
   # if 255.255.255.25[45], then return "<none>"
 
-  local i1 i2 i3 il f
-  IFS=. read -r i1 i2 i3 il <<< "$1"
-  f="$i1.$i2.$i3.$(( il + 1 ))"
+  local ipa ipb ipc ipd first_usable
+
+  IFS='.' read -r ipa ipb ipc ipd <<< "$1"
+  first_usable="$ipa.$ipb.$ipc.$(( ipd + 1 ))"
 
   # return
-  echo -n "$f"
+  echo -n "$first_usable"
 }
 
-get_ip_lastu_address() {
+get_ip_last_address() {
   # gather the last usable ip address given a broadcast address and subnet
   #
   # ARG $1: broadcast ip address
   # ARG $2: subnet mask
-  # RET: first usable ip address
+  # RET: last usable ip address
 
   [[ "$2" =~ ^255\.255\.255\.25[45]$ ]] && echo -n "<none>" && return 0
   # if 255.255.255.25[45], then return "<none>"
 
-  local i1 i2 i3 il f
-  IFS=. read -r i1 i2 i3 il <<< "$1"
-  f="$i1.$i2.$i3.$(( il - 1 ))"
+  local ipa ipb ipc ipd last_usable
+
+  IFS='.' read -r ipa ipb ipc ipd <<< "$1"
+  last_usable="$ipa.$ipb.$ipc.$(( ipd - 1 ))"
 
   # return
-  echo -n "$f"
+  echo -n "$last_usable"
 }
 
 gather_gasmask_cidr() {
@@ -518,20 +527,19 @@ gather_gasmask_cidr() {
   # ARG $1: cidr
   # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
 
-  local c s h w u
-  # set cidr
-  c="$1"
   # validate entered cidr
-  validate_cidr "$c" || return 1
+  validate_cidr "$1" || return 1
+
+  local subnet_mask hex wildcard usable_ips
 
   # get subnet mask, hex, wildcard bits, usable ips
-  s=$(cidr2subnetmask "$c")
-  h=$(subnetmask2hex "$s")
-  w=$(subnetmask2wildcard "$s")
-  u=$(cidr2nouips "$c")
+  subnet_mask=$(cidr_to_subnetmask "$1")
+  hex=$(subnetmask_to_hex "$subnet_mask")
+  wildcard=$(subnetmask_to_wildcard "$subnet_mask")
+  usable_ips=$(cidr_to_no_ips "$1")
 
   # return
-  echo -n "$c $s $h $w $u"
+  echo -n "$1 $subnet_mask $hex $wildcard $usable_ips"
 }
 
 gather_gasmask_subnet() {
@@ -540,20 +548,19 @@ gather_gasmask_subnet() {
   # ARG $1: subnet mask
   # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
 
-  local c s h w u
-  # set subnet mask
-  s="$1"
   # validate entered subnet mask
-  validate_subnet "$s" || return 1
+  validate_subnet "$1" || return 1
+
+  local cidr hex wildcard usable_ips
 
   # get cidr, hex, wildcard bits, usable ips
-  c=$(subnetmask2cidr "$s")
-  h=$(subnetmask2hex "$s")
-  w=$(subnetmask2wildcard "$s")
-  u=$(cidr2nouips "$c")
+  cidr=$(subnetmask_to_cidr "$1")
+  hex=$(subnetmask_to_hex "$1")
+  wildcard=$(subnetmask_to_wildcard "$1")
+  usable_ips=$(cidr_to_no_ips "$cidr")
 
   # return
-  echo -n "$c $s $h $w $u"
+  echo -n "$cidr $1 $hex $wildcard $usable_ips"
 }
 
 gather_gasmask_hex() {
@@ -562,20 +569,19 @@ gather_gasmask_hex() {
   # ARG $1: subnet mask
   # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
 
-  local c s h w u
-  # set hexadecimal subnet mask
-  h="$1"
   # validate entered hex
-  validate_hex "$h" || return 1
+  validate_hex "$1" || return 1
+
+  local cidr subnet_mask wildcard usable_ips
 
   # get cidr, subnet mask, wildcard bits, usable ips
-  s=$(hex2subnetmask "$h")
-  c=$(subnetmask2cidr "$s")
-  w=$(subnetmask2wildcard "$s")
-  u=$(cidr2nouips "$c")
+  subnet_mask=$(hex_to_subnetmask "$1")
+  cidr=$(subnetmask_to_cidr "$subnet_mask")
+  wildcard=$(subnetmask_to_wildcard "$subnet_mask")
+  usable_ips=$(cidr_to_no_ips "$cidr")
 
   # return
-  echo -n "$c $s $h $w $u"
+  echo -n "$cidr $subnet_mask $1 $wildcard $usable_ips"
 }
 
 gather_gasmask_wildcard() {
@@ -584,20 +590,19 @@ gather_gasmask_wildcard() {
   # ARG $1: wildcard bits
   # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
 
-  local c s h w u
-  # set wildcard
-  w="$1"
   # validate entered wildcard
-  validate_wildcard "$w" || return 1
+  validate_wildcard "$1" || return 1
+
+  local cidr subnet_mask hex usable_ips
 
   # get cidr, subnet mask, hex, usable ips
-  s=$(wildcard2subnetmask "$w")
-  c=$(subnetmask2cidr "$s")
-  h=$(subnetmask2hex "$s")
-  u=$(cidr2nouips "$c")
+  subnet_mask=$(wildcard_to_subnetmask "$1")
+  cidr=$(subnetmask_to_cidr "$subnet_mask")
+  hex=$(subnetmask_to_hex "$subnet_mask")
+  usable_ips=$(cidr_to_no_ips "$cidr")
 
   # return
-  echo -n "$c $s $h $w $u"
+  echo -n "$cidr $subnet_mask $hex $1 $usable_ips"
 }
 
 gather_gasmask_ip() {
@@ -607,21 +612,19 @@ gather_gasmask_ip() {
   # ARG $2: subnet mask
   # RET: ip addr, network addr, broadcast addr, first usable ip, last usable ip
 
-  local i s n b f l
-  # set ip and subnet mask
-  i="$1"
-  s="$2"
   # validate entered ip address
-  validate_ip_address "$i" || return 1
+  validate_ip_address "$1" || return 1
+
+  local network_addr broadcast_addr first_usable last_usable
 
   # get network, broadcast, first and last usable
-  n=$(get_ip_network_address "$i" "$s")
-  b=$(get_ip_broadcast_address "$i" "$s")
-  f=$(get_ip_firstu_address "$n" "$s")
-  l=$(get_ip_lastu_address "$b" "$s")
+  network_addr=$(get_ip_network_address "$1" "$2")
+  broadcast_addr=$(get_ip_broadcast_address "$1" "$2")
+  first_usable=$(get_ip_first_address "$network_addr" "$2")
+  last_usable=$(get_ip_last_address "$broadcast_addr" "$2")
 
   # return
-  echo -n "$i $n $b $f $l"
+  echo -n "$1 $network_addr $broadcast_addr $first_usable $last_usable"
 }
 
 cidr_fail() {
@@ -664,7 +667,7 @@ ip_fail() {
 
 main() {
   # verify that "-h" or "--help" was not requested in $1
-  check4args "$@"
+  check_for_args "$@"
 
   local subnet_value_initial subnet_type_initial ip_address whatmask_mode
   # there are two output formats used by `whatmask`
