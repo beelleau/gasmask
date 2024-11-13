@@ -33,7 +33,7 @@ gasmask will echo back all information from the first mode, and additionally the
 ## Examples
 
 ```
-➞ $ gasmask /26
+ $ gasmask /26
 
 ---------------------------------------------
        TCP/IP SUBNET MASK EQUIVALENTS
@@ -43,11 +43,10 @@ Netmask = ..................: 255.255.255.192
 Netmask (hex) = ............: 0xffffffc0
 Wildcard Bits = ............: 0.0.0.63
 Usable IP Addresses = ......: 62
-
 ```
 
 ```
-➞ $ gasmask 255.255.192.0
+ $ gasmask 255.255.192.0
 
 ---------------------------------------------
        TCP/IP SUBNET MASK EQUIVALENTS
@@ -60,26 +59,90 @@ Usable IP Addresses = ......: 16,382
 ```
 
 ```
-➞ $ gasmask 192.168.0.113/0xffffffe0
+ $ gasmask 0xffffffe0
+
+---------------------------------------------
+       TCP/IP SUBNET MASK EQUIVALENTS
+---------------------------------------------
+CIDR = .....................: /27
+Netmask = ..................: 255.255.255.224
+Netmask (hex) = ............: 0xffffffe0
+Wildcard Bits = ............: 0.0.0.31
+Usable IP Addresses = ......: 30
+```
+
+```
+ $ gasmask 0.0.0.31
+
+---------------------------------------------
+       TCP/IP SUBNET MASK EQUIVALENTS
+---------------------------------------------
+CIDR = .....................: /27
+Netmask = ..................: 255.255.255.224
+Netmask (hex) = ............: 0xffffffe0
+Wildcard Bits = ............: 0.0.0.31
+Usable IP Addresses = ......: 30
+```
+
+```
+ $ gasmask 192.168.75.4/23
 
 ------------------------------------------------
            TCP/IP NETWORK INFORMATION
 ------------------------------------------------
-IP Entered = ..................: 192.168.0.113
-CIDR = ........................: /27
-Netmask = .....................: 255.255.255.224
-Netmask (hex) = ...............: 0xffffffe0
-Wildcard Bits = ...............: 0.0.0.31
+IP Entered = ..................: 192.168.75.4
+CIDR = ........................: /23
+Netmask = .....................: 255.255.254.0
+Netmask (hex) = ...............: 0xfffffe00
+Wildcard Bits = ...............: 0.0.1.255
 ------------------------------------------------
-Network Address = .............: 192.168.0.96
-Broadcast Address = ...........: 192.168.0.127
-Usable IP Addresses = .........: 30
-First Usable IP Address = .....: 192.168.0.97
-Last Usable IP Address = ......: 192.168.0.126
+Network Address = .............: 192.168.74.0
+Broadcast Address = ...........: 192.168.75.255
+Usable IP Addresses = .........: 510
+First Usable IP Address = .....: 192.168.74.1
+Last Usable IP Address = ......: 192.168.75.254
 ```
 
 ```
-➞ $ gasmask 192.168.0.169/0.0.0.127
+ $ gasmask 10.2.2.2/255.0.0.0
+
+------------------------------------------------
+           TCP/IP NETWORK INFORMATION
+------------------------------------------------
+IP Entered = ..................: 10.2.2.2
+CIDR = ........................: /8
+Netmask = .....................: 255.0.0.0
+Netmask (hex) = ...............: 0xff000000
+Wildcard Bits = ...............: 0.255.255.255
+------------------------------------------------
+Network Address = .............: 10.0.0.0
+Broadcast Address = ...........: 10.255.255.255
+Usable IP Addresses = .........: 16,777,214
+First Usable IP Address = .....: 10.0.0.1
+Last Usable IP Address = ......: 10.255.255.254
+```
+
+```
+ $ gasmask 172.17.10.4/0xffff0000
+
+------------------------------------------------
+           TCP/IP NETWORK INFORMATION
+------------------------------------------------
+IP Entered = ..................: 172.17.10.4
+CIDR = ........................: /16
+Netmask = .....................: 255.255.0.0
+Netmask (hex) = ...............: 0xffff0000
+Wildcard Bits = ...............: 0.0.255.255
+------------------------------------------------
+Network Address = .............: 172.17.0.0
+Broadcast Address = ...........: 172.17.255.255
+Usable IP Addresses = .........: 65,534
+First Usable IP Address = .....: 172.17.0.1
+Last Usable IP Address = ......: 172.17.255.254
+```
+
+```
+ $ gasmask 192.168.0.169/0.0.0.127
 
 ------------------------------------------------
            TCP/IP NETWORK INFORMATION
