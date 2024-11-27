@@ -8,7 +8,7 @@
 ## 'whatmask' Author: Joe Laffey <joe@laffeycomputer.com>
 ## 'whatmask' URL: http://www.laffeycomputer.com/whatmask.html
 ## Author: Kyle Belleau <kylejbelleau@gmail.com>
-## URL: https://github.com/kbelleau/gasmask
+## URL: https://github.com/beelleau/gasmask
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ show_help() {
   echo ""
   echo "See the README for more information, or"
   echo "run \"gasmask\" with no arguments, or"
-  echo "visit https://github.com/kbelleau/gasmask"
+  echo "visit https://github.com/beelleau/gasmask"
   echo ""
 }
 
@@ -57,7 +57,7 @@ show_noarg() {
   echo "whatmask: Copyright (C) 2001-2003 Joe Laffey <joe@laffeycomputer.com>"
   echo "Visit http://www.laffeycomputer.com/whatmask.html for more information"
   echo "gasmask: Copyright (C) 2024 Kyle Belleau <kylejbelleau@gmail.com>"
-  echo "Visit https://github.com/kbelleau/gasmask for more information"
+  echo "Visit https://github.com/beelleau/gasmask for more information"
   echo ""
   echo "This program is licensed under the GNU General Public License version 3"
   echo "or later (GPL-3.0-or-later)."

@@ -7,7 +7,7 @@ gasmask is a Bash-written copy of [Whatmask](http://www.laffeycomputer.com/whatm
 ## Installation
 To install `gasmask`, simply clone this repository and symlink, copy, or move the script into a directory that is in your `$PATH`.  
 
-`git clone https://github.com/kbelleau/gasmask.git`  
+`git clone https://github.com/beelleau/gasmask.git`  
 
 ## Usage
 gasmask has two modes. In both modes, `gasmask` will only acknowledge the first argument entered with the command. Additionally, one argument is always required with the gasmkask script.  
