@@ -1,8 +1,8 @@
 # gasmask
 
-gasmask is a shell script written for Bash 4.0+ that can help you configure network settings.  
+Gasmask is a shell script written for Bash 4.0+ that can help you configure network settings.  
 
-gasmask is a Bash-written copy of [Whatmask](http://www.laffeycomputer.com/whatmask.html). You can find more information about the `whatmask` utility at this website: http://www.laffeycomputer.com/whatmask.html
+`gasmask` is a Bash-written copy of Whatmask. You can find more information about the `whatmask` utility at this website: http://www.laffeycomputer.com/whatmask.html
 
 ## Installation
 To install `gasmask`, simply clone this repository and symlink, copy, or move the script into a directory that is in your `$PATH`.  
@@ -10,11 +10,11 @@ To install `gasmask`, simply clone this repository and symlink, copy, or move th
 `git clone https://github.com/beelleau/gasmask.git`  
 
 ## Usage
-gasmask has two modes. In both modes, `gasmask` will only acknowledge the first argument entered with the command. Additionally, one argument is always required with the gasmkask script.  
+Gasmask has two modes. In both modes, `gasmask` will only acknowledge the first argument entered with the command. Additionally, one argument is always required with the gasmkask script.  
 
 The first mode is used by invoking `gasmask` with only a subnet mask as an argument. In this mode, gasmask will echo back the subnet mask in four formats, plus the number of usable addresses in the subnet's range.  
 
-gasmask notations supported:  
+Subnet mask notations supported:  
 | Name          | Example       |
 |---------------|---------------|
 | CIDR          | /24           |
@@ -24,11 +24,11 @@ gasmask notations supported:
 
 The above notations are all identical. CIDR notation commonly has a slash ("/") in front of it, but gasmask can accept CIDR values with or without a slash.  
 
-To use gasmask in its second mode, invoke `gasmask` with any IP address within the subnet, followed by a slash ("/"), followed by the subnet mask in any format. Be sure to not include any spaces in this string.  
+To use gasmask in its second mode, invoke `gasmask` with any valid IP address, followed by a slash ("/"), followed by the subnet mask in any format. Be sure to not include any spaces in this string.  
 
-gasmask will echo back all information from the first mode, and additionally the network address, broadcast address, and first+last usable IP addresses.  
+Gasmask will echo back all information from the first mode, and additionally the network address, broadcast address, and first+last usable IP addresses.  
 
-(gasmask assumes that the broadcast address is the highest address in the subnet, which is the most common configuration.)
+(`gasmask` assumes that the broadcast address is the highest address in the subnet, which is the most common configuration.)
 
 ## Examples
 
