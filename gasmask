@@ -30,7 +30,7 @@ trap 'echo -e "\nSIGINT Received... exiting"; exit 130' SIGINT
 
 err() {
   # send errors to standard error
-  echo "$*" >&2
+  echo "[${0##*/}] error: $*" >&2
 }
 
 show_help() {
@@ -630,7 +630,7 @@ gather_gasmask_ip() {
 cidr_fail() {
   # fail message for invalid cidr
 
-  err "gasmask: CIDR notations must be a number between 0 and 32 inclusive!"
+  err "CIDR notations must be a number between 0 and 32 inclusive!"
   exit 1
 }
 
@@ -639,7 +639,7 @@ subnetmask_wildcard_fail() {
   #
   # ARG $1: subnet mask or wildcard bits
 
-  err "gasmask: \"${1}\" is not a valid subnet mask or wildcard bits mask!"
+  err "\"${1}\" is not a valid subnet mask or wildcard bits mask!"
   exit 1
 }
 
@@ -648,8 +648,8 @@ hex_fail() {
   #
   # ARG $1: hexadecimal subnet mask
 
-  err "gasmask: \"${1}\" is not a valid subnet mask!"
-  err "(Hex values need 8 chars [0-9][a-f][A-F])"
+  err "\"${1}\" is not a valid subnet mask!"
+  echo "(Hex values need 8 chars [0-9][a-f][A-F])"
   exit 1
 }
 
@@ -658,8 +658,8 @@ ip_fail() {
   #
   # ARG $1: ip address
 
-  err "gasmask : \"${1}\" is not a valid IP address!"
-  echo "IP addresses take the form \"xxx.xxx.xxx\" where"
+  err "\"${1}\" is not a valid IP address!"
+  echo "IP addresses take the form \"xxx.xxx.xxx.xxx\" where"
   echo "each octed (group of numbers separated by dots) must be"
   echo "between 0 and 255 inclusive!"
   exit 1
@@ -693,8 +693,7 @@ main() {
 
   # determie what initial subnet value given
   subnet_type_initial=$(subnet_which_initial "$subnet_value_initial") || \
-    err \
-      "gasmask: \"$subnet_value_initial\" subnet type could not be determined"
+    err "\"$subnet_value_initial\" subnet type could not be determined"
 
   local subnet_output
   case "$subnet_type_initial" in
