@@ -472,19 +472,25 @@ gather_gasmask_cidr() {
   # ARG $1: cidr
   # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
 
+  local cidr="$1"
+
+  # removing leading zeros unless input is exactly '0'
+  [[ "$cidr" != "0" && "$cidr" =~ ^0 ]] && \
+    cidr="${cidr##0}"
+
   # validate entered cidr
-  validate_cidr "$1" || return 1
+  validate_cidr "$cidr" || return 1
 
   local subnet_mask hex wildcard usable_ips
 
   # get subnet mask, hex, wildcard bits, usable ips
-  subnet_mask=$(cidr_to_subnetmask "$1")
+  subnet_mask=$(cidr_to_subnetmask "$cidr")
   hex=$(subnetmask_to_hex "$subnet_mask")
   wildcard=$(subnetmask_to_wildcard "$subnet_mask")
-  usable_ips=$(cidr_to_no_ips "$1")
+  usable_ips=$(cidr_to_no_ips "$cidr")
 
   # return
-  echo -n "$1 $subnet_mask $hex $wildcard $usable_ips"
+  echo -n "$cidr $subnet_mask $hex $wildcard $usable_ips"
 }
 
 gather_gasmask_subnet() {
