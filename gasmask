@@ -122,7 +122,7 @@ subnet_which_initial() {
   if [[ "$1" =~ \. ]]; then
     # if we have an address, we'll check the first octet to decide if it is
     # a subnet mask or a wildcard mask
-    mask="${1%%.*}"
+    mask="${1%%\.*}"
     [[ "$mask" -gt 127 ]] && echo "subnetmask"
     [[ "$mask" -le 127 ]] && echo "wildcard"
     return 0
@@ -289,7 +289,7 @@ subnetmask_to_cidr() {
 
   # `to` should be named `trailing_octets`, but it's too long
   local to
-  to=${1##*255.}
+  to="${1##*255\.}"
   set -- \
       "0^^^128^192^224^240^248^252^254^" "$(( (${#1} - ${#to})*2 ))" "${to%%.*}"
   to=${1%%"${3}"*}
@@ -635,7 +635,7 @@ main() {
   # mode 2 means that we did get an ip address in $1
   if [[ "$1" =~ "/" ]]; then
     subnet_value_initial="${1#*/}"
-    ip_address="${1%%/*}"
+    ip_address="${1%/*}"
     # if a slash was used without an ip address, then it's still assigned mode 1
     [[ -z "$ip_address" ]] && whatmask_mode="1"
     # if a slash was used with an ip address, then we assign mode 2
