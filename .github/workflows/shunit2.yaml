@@ -1,0 +1,23 @@
+---
+
+name: gasmask-CI
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install shunit2
+        run: sudo apt update && sudo apt install -y shellcheck shunit2
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: error
+
+      - name: Run shUnit tests
+        run: bash tests/test_gasmask.sh
