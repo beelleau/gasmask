@@ -77,14 +77,14 @@ show_noarg() {
   echo "                       CIDR notation (e.g. \"24\")"
   echo "                       Netmask notation (e.g. \"255.255.255.0\")"
   echo "                       Hex Netmask notation (e.g. \"0xffffff00\")"
-  echo "                       Wildcard bits notation (e.g. \"0.0.0.255\")"
+  echo "                       Wildcard bit notation (e.g. \"0.0.0.255\")"
   echo " NOTE: gasmask will autodetect the netmask format."
   echo ""
 }
 
 subnet_which_initial() {
   # determines which type of subnet value was entered in $1
-  # possible outcomes: CIDR, subnet mask, subnet hexidecimal, wildcard bits
+  # possible outcomes: CIDR, subnet mask, subnet hexidecimal, wildcard bit
   #
   # ARG $1: anything that you may think is a subnetting value
   # RET: probable intended subnet mask notation type
@@ -97,7 +97,7 @@ subnet_which_initial() {
   fi
 
   # the 0.0.0.0 check: the only special case
-  # 0.0.0.0 (and 255.255.255.255) can be subnet masks or wildcard bits
+  # 0.0.0.0 (and 255.255.255.255) can be subnet masks or wildcard bit
   # we will always default to it being a subnet mask, though
   if [[ "$1" == "0.0.0.0" ]]; then
     echo -n "subnetmask"
@@ -157,7 +157,7 @@ validate_subnet() {
 
   # return - input validation
   # a valid value should have returned already; if not, fail
-  err "\"${1}\" is not a valid subnet mask or wildcard bits mask!"
+  err "\"${1}\" is not a valid subnet mask or wildcard bit mask!"
   return 1
 }
 
@@ -189,9 +189,9 @@ validate_hex() {
 }
 
 validate_wildcard() {
-  # validates given wildcard bits
+  # validates given wildcard bit
   #
-  # ARG $1: wildcard bits
+  # ARG $1: wildcard bit
   # RET: 0=valid, 1=fail
 
   local -A valid_wildcard=(
@@ -210,7 +210,7 @@ validate_wildcard() {
 
   # return - input validation
   # a valid value should have returned already; if not, fail
-  err "\"${1}\" is not a valid subnet mask or wildcard bits mask!"
+  err "\"${1}\" is not a valid subnet mask or wildcard bit mask!"
   return 1
 }
 
@@ -305,14 +305,14 @@ hex_to_subnetmask() {
 }
 
 wildcard_to_subnetmask() {
-  # converts wildcard bits into a subnet mask
+  # converts wildcard bit into a subnet mask
   #
-  # ARG $1: wildcard bits
+  # ARG $1: wildcard bit
   # RET: subnet mask
 
   local -a wildcard_array=()
   local subnet_mask=""
-  # convert wildcard bits to array of octets
+  # convert wildcard bit to array of octets
   IFS='.' read -r -a wildcard_array <<< "$1"
 
   for (( i=0; i<4; i++ )); do
@@ -491,7 +491,7 @@ gather_gasmask_cidr() {
   # gather subnet information given a cidr
   #
   # ARG $1: cidr
-  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
+  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bit, usable ips
 
   local cidr="$1"
   # removing leading zeros unless input is exactly '0'
@@ -514,7 +514,7 @@ gather_gasmask_subnet() {
   # gather subnet information given a subnet mask
   #
   # ARG $1: subnet mask
-  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
+  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bit, usable ips
 
   # validate entered subnet mask
   validate_subnet "$1" || return 1
@@ -533,7 +533,7 @@ gather_gasmask_hex() {
   # gather subnet information given a subnet mask
   #
   # ARG $1: subnet mask
-  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
+  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bit, usable ips
 
   # validate entered hex
   validate_hex "$1" || return 1
@@ -549,10 +549,10 @@ gather_gasmask_hex() {
 }
 
 gather_gasmask_wildcard() {
-  # gather subnet information given wildcard bits
+  # gather subnet information given wildcard bit
   #
-  # ARG $1: wildcard bits
-  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bits, usable ips
+  # ARG $1: wildcard bit
+  # RET: cidr, subnet mask, subnet mask hexadecimal, wildcard bit, usable ips
 
   # validate entered wildcard
   validate_wildcard "$1" || return 1
@@ -697,4 +697,4 @@ main() {
   fi
 }
 
-main "$@"
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && main "$@"
