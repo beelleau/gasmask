@@ -25,7 +25,7 @@ gasmask is a Bash-written copy of Whatmask
 
 whatmask: Copyright (C) 2001-2003 Joe Laffey <joe@laffeycomputer.com>
 Visit http://www.laffeycomputer.com/whatmask.html for more information
-gasmask: Copyright (C) 2024 Kyle Belleau <kylejbelleau@gmail.com>
+gasmask: Copyright (C) 2024-2025 Kyle Belleau <kylejbelleau@gmail.com>
 Visit https://github.com/beelleau/gasmask for more information
 
 This program is licensed under the GNU General Public License version 3
