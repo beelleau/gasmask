@@ -92,7 +92,14 @@ test_validate_cidr() {
   local result=""
   result="$(validate_cidr 34 2>&1)"
   assertEquals "1" $?
-  assert_grep "CIDR notations must be a number between 0 and 32 inclusive!" "$result"
+  assert_grep "CIDR notations must be a number between 0 and 32 inclusive!" \
+              "$result"
+
+  local result=""
+  result="$(validate_cidr 014 2>&1)"
+  assertEquals "1" $?
+  assert_Grep "CIDR notations must be a number between 0 and 32 inclusive!" \
+              "$result"
 
   local result=""
   result="$(validate_cidr 0)"
@@ -385,11 +392,13 @@ test_gather_gasmask_wildcard() {
 }
 
 test_gather_gasmask_ip() {
-  local result="" expect="192.168.72.79 192.168.72.64 192.168.72.95 192.168.72.65 192.168.72.94"
+  local result=""
+  local expect="192.168.72.64 192.168.72.95 192.168.72.65 192.168.72.94"
   result="$(gather_gasmask_ip 192.168.72.79 255.255.255.224)"
   assertEquals "$expect" "$result"
 
-  local result="" expect="10.11.12.13 10.8.0.0 10.11.255.255 10.8.0.1 10.11.255.254"
+  local result=""
+  local expect="10.8.0.0 10.11.255.255 10.8.0.1 10.11.255.254"
   result="$(gather_gasmask_ip 10.11.12.13 255.252.0.0)"
   assertEquals "$expect" "$result"
 
@@ -421,7 +430,8 @@ EOF
   local result=""
   result="$(main 42 2>&1)"
   assertEquals "1" $?
-  assert_grep "CIDR notations must be a number between 0 and 32 inclusive!" "$result"
+  assert_grep "CIDR notations must be a number between 0 and 32 inclusive!" \
+              "$result"
 }
 
 test_get_help() {
