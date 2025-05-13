@@ -55,7 +55,7 @@ EOF
 }
 
 test_subnet_which_initial() {
-  local result="" expect="subnetmask"
+  local result="" expect="dotdecimal"
   result="$(subnet_which_initial 255.255.255.0)"
   assertEquals "$expect" "$result"
 
@@ -75,7 +75,7 @@ test_subnet_which_initial() {
   result="$(subnet_which_initial 34)"
   assertEquals "$expect" "$result"
 
-  local result="" expect="subnetmask"
+  local result="" expect="dotdecimal"
   result="$(subnet_which_initial 192.168.23.2)"
   assertEquals "$expect" "$result"
 
@@ -98,7 +98,7 @@ test_validate_cidr() {
   local result=""
   result="$(validate_cidr 014 2>&1)"
   assertEquals "1" $?
-  assert_Grep "CIDR notations must be a number between 0 and 32 inclusive!" \
+  assert_grep "CIDR notations must be a number between 0 and 32 inclusive!" \
               "$result"
 
   local result=""
@@ -110,22 +110,22 @@ test_validate_cidr() {
   assertEquals "0" $?
 }
 
-test_validate_subnet() {
+test_validate_dotdecimal() {
   local result=""
-  result="$(validate_subnet 255.255.255.0)"
+  result="$(validate_dotdecimal 255.255.255.0)"
   assertEquals "0" $?
 
   local result=""
-  result="$(validate_subnet 255.255.255.00 2>&1)"
+  result="$(validate_dotdecimal 255.255.255.00 2>&1)"
   assertEquals "1" $?
   assert_grep "is not a valid subnet mask or wildcard bit mask!" "$result"
 
   local result=""
-  result="$(validate_subnet 255.255.255.255)"
+  result="$(validate_dotdecimal 255.255.255.255)"
   assertEquals "0" $?
 
   local result=""
-  result="$(validate_subnet 128.0.0.0)"
+  result="$(validate_dotdecimal 128.0.0.0)"
   assertEquals "0" $?
 }
 
@@ -182,7 +182,7 @@ test_validate_ip_address() {
   local result=""
   result="$(validate_ip_address 10.11.12.13)"
   assertEquals "0" $?
-
+p
   local result=""
   result="$(validate_ip_address 1.0.0.0)"
   assertEquals "0" $?
@@ -200,64 +200,89 @@ test_validate_ip_address() {
   assert_grep "IP addresses take the form" "$result"
 }
 
-test_cidr_to_subnetmask() {
-  local result="" expect="255.255.255.0"
-  result="$(cidr_to_subnetmask 24)"
+test_cidr_to_binary() {
+  local result="" expect="11111111111111111111111100000000"
+  result="$(cidr_to_binary 24)"
 
   assertEquals "$expect" "$result"
 
-  local result="" expect="255.248.0.0"
-  result="$(cidr_to_subnetmask 13)"
+  local result="" expect="11111111111110000000000000000000"
+  result="$(cidr_to_binary 13)"
   assertEquals "$expect" "$expect"
 }
 
-test_hex_to_subnetmask() {
-  local result="" expect="255.255.254.0"
-  result="$(hex_to_subnetmask 0xfffffe00)"
+test_dotdecimal_to_binary() {
+  local result="" expect="11111111111111111111111111000000"
+  result="$(dotdecimal_to_binary 255.255.255.192)"
   assertEquals "$expect" "$result"
 
-  local result="" expect="254.0.0.0"
-  result="$(hex_to_subnetmask 0xfe000000)"
-  assertEquals "$expect" "$result"
-}
-
-test_wildcard_to_subnetmask() {
-  local result="" expect="255.255.255.224"
-  result="$(wildcard_to_subnetmask 0.0.0.31)"
-  assertEquals "$expect" "$result"
-
-  local result="" expect="240.0.0.0"
-  result="$(wildcard_to_subnetmask 15.255.255.255)"
+  local result="" expect="11111000000000000000000000000000"
+  result="$(dotdecimal_to_binary 248.0.0.0)"
   assertEquals "$expect" "$result"
 }
 
-test_subnetmask_to_cidr() {
-  local result="" expect="10"
-  result="$(subnetmask_to_cidr 255.192.0.0)"
+test_hex_to_binary() {
+  local result="" expect="11111111111111111111111111100000"
+  result="$(hex_to_binary 0xffffffe0)"
   assertEquals "$expect" "$result"
 
-  local result="" expect="29"
-  result="$(subnetmask_to_cidr 255.255.255.248)"
+  local result="" expect="11110000000000000000000000000000"
+  result="$(hex_to_binary 0xf0000000)"
+  assertEquals "$expect" "$result"
+
+  # test an UPCASE hex value
+  local result="" expect="11111111111111111111111100000000"
+  result="$(hex_to_binary 0XFFFFFF00)"
   assertEquals "$expect" "$result"
 }
 
-test_subnetmask_to_hex() {
+test_wildcard_to_binary() {
+  local result="" expect="11111111110000000000000000000000"
+  result="$(wildcard_to_binary 0.63.255.255)"
+  assertEquals "$expect" "$result"
+
+  local result="" expect="11111111111111111111111111111000"
+  result="$(wildcard_to_binary 0.0.0.7)"
+  assertEquals "$expect" "$result"
+}
+
+test_binary_to_cidr() {
+  local result="" expect="19"
+  result="$(binary_to_cidr 11111111111111111110000000000000)"
+  assertEquals "$expect" "$result"
+
+  local result="" expect="30"
+  result="$(binary_to_cidr 11111111111111111111111111111100)"
+  assertEquals "$expect" "$result"
+}
+
+test_binary_to_dotdecimal() {
+  local result="" expect="255.255.240.0"
+  result="$(binary_to_dotdecimal 11111111111111111111000000000000)"
+  assertEquals "$expect" "$result"
+
+  local result="" expect="255.255.255.248"
+  result="$(binary_to_dotdecimal 11111111111111111111111111111000)"
+  assertEquals "$expect" "$result"
+}
+
+test_binary_to_hex() {
   local result="" expect="0xffff0000"
-  result="$(subnetmask_to_hex 255.255.0.0)"
+  result="$(binary_to_hex 11111111111111110000000000000000)"
   assertEquals "$expect" "$result"
 
   local result="" expect="0xffffffe0"
-  result="$(subnetmask_to_hex 255.255.255.224)"
+  result="$(binary_to_hex 11111111111111111111111111100000)"
   assertEquals "$expect" "$result"
 }
 
-test_subnetmask_to_wildcard() {
-  local result="" expect="0.0.255.255"
-  result="$(subnetmask_to_wildcard 255.255.0.0)"
+test_binary_to_wildcard() {
+  local result="" expect="0.0.0.255"
+  result="$(binary_to_wildcard 11111111111111111111111100000000)"
   assertEquals "$expect" "$result"
 
-  local result="" expect="0.0.7.255"
-  result="$(subnetmask_to_wildcard 255.255.248.0)"
+  local result="" expect="0.0.15.255"
+  result="$(binary_to_wildcard 11111111111111111111000000000000)"
   assertEquals "$expect" "$result"
 }
 
@@ -345,19 +370,14 @@ test_gather_gasmask_cidr() {
   assertEquals "$expect" "$result"
 }
 
-test_gather_gasmask_subnet() {
+test_gather_gasmask_dotdecimal() {
   local result="" expect="30 255.255.255.252 0xfffffffc 0.0.0.3 2"
-  result="$(gather_gasmask_subnet 255.255.255.252)"
+  result="$(gather_gasmask_dotdecimal 255.255.255.252)"
   assertEquals "$expect" "$result"
 
   local result="" expect="14 255.252.0.0 0xfffc0000 0.3.255.255 262142"
-  result="$(gather_gasmask_subnet 255.252.0.0)"
+  result="$(gather_gasmask_dotdecimal 255.252.0.0)"
   assertEquals "$expect" "$result"
-
-  local result=""
-  result="$(gather_gasmask_subnet 255.254.255.0 2>&1)"
-  assertEquals "1" $?
-  assert_grep "is not a valid subnet mask or wildcard bit mask!" "$result"
 }
 
 test_gather_gasmask_hex() {
@@ -368,12 +388,6 @@ test_gather_gasmask_hex() {
   local result="" expect="17 255.255.128.0 0xffff8000 0.0.127.255 32766"
   result="$(gather_gasmask_hex 0xffff8000)"
   assertEquals "$expect" "$result"
-
-  local result=""
-  result="$(gather_gasmask_hex 0xfffffffx 2>&1)"
-  assertEquals "1" $?
-  assert_grep "is not a valid subnet mask!" "$result"
-  assert_grep "Hex values need 8 chars" "$result"
 }
 
 test_gather_gasmask_wildcard() {
@@ -384,11 +398,6 @@ test_gather_gasmask_wildcard() {
   local result="" expect="27 255.255.255.224 0xffffffe0 0.0.0.31 30"
   result="$(gather_gasmask_wildcard 0.0.0.31)"
   assertEquals "$expect" "$result"
-
-  local result=""
-  result="$(gather_gasmask_wildcard 0.0.0.32 2>&1)"
-  assertEquals "1" $?
-  assert_grep "is not a valid subnet mask or wildcard bit mask!" "$result"
 }
 
 test_gather_gasmask_ip() {
@@ -401,12 +410,6 @@ test_gather_gasmask_ip() {
   local expect="10.8.0.0 10.11.255.255 10.8.0.1 10.11.255.254"
   result="$(gather_gasmask_ip 10.11.12.13 255.252.0.0)"
   assertEquals "$expect" "$result"
-
-  local result=""
-  result="$(gather_gasmask_ip 172.1270.23.4 255.255.255.0 2>&1)"
-  assertEquals "1" $?
-  assert_grep "is not a valid IP address!" "$result"
-  assert_grep "IP addresses take the form" "$result"
 }
 
 test_main() {
